@@ -7,7 +7,7 @@
     <key>CFBundleDisplayName</key>
     <string>choosepaste</string>
     <key>CFBundleIdentifier</key>
-    <string>com.fairbearlabs.choosepaste</string>
+    <string>com.fairbearlab.choosepaste</string>
     <key>CFBundleVersion</key>
     <string>1</string>
     <key>CFBundleShortVersionString</key>
