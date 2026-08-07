@@ -1,0 +1,27 @@
+<p>Here's how to implement a binary search in Go:</p>
+<pre><code class="language-go">func binarySearch(arr []int, target int) int {
+    low, high := 0, len(arr)-1
+
+    for low &lt;= high {
+        mid := low + (high-low)/2
+
+        if arr[mid] == target {
+            return mid
+        } else if arr[mid] &lt; target {
+            low = mid + 1
+        } else {
+            high = mid - 1
+        }
+    }
+
+    return -1 // not found
+}</code></pre>
+<h3>How it works</h3>
+<ol>
+<li>Start with the full array range</li>
+<li>Compare the middle element with the target</li>
+<li>If equal, return the index</li>
+<li>If less, search the right half</li>
+<li>If greater, search the left half</li>
+</ol>
+<p>Time complexity: <strong>O(log n)</strong>. Space complexity: <strong>O(1)</strong>.</p>

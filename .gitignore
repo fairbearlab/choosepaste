@@ -1,0 +1,20 @@
+# Build artifacts
+.build/
+build/
+
+# macOS
+.DS_Store
+
+# Xcode
+*.xcodeproj
+xcuserdata/
+
+# VS Code
+.vscode/
+
+# Tool versions (local)
+.tool-versions
+
+# AI tooling config (local)
+CLAUDE.md
+.claude/

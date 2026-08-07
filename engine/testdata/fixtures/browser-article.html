@@ -1,0 +1,30 @@
+<h1>Getting Started with Swift Concurrency</h1>
+<p>Swift concurrency introduces <code>async</code>/<code>await</code> as first-class language features, replacing completion handler patterns with structured, readable code.</p>
+<h2>Basic async function</h2>
+<pre><code class="language-swift">func fetchUser(id: Int) async throws -&gt; User {
+    let url = URL(string: "https://api.example.com/users/\(id)")!
+    let (data, _) = try await URLSession.shared.data(from: url)
+    return try JSONDecoder().decode(User.self, from: data)
+}</code></pre>
+<h2>Key concepts</h2>
+<ul>
+<li><strong>async</strong> marks a function that can suspend</li>
+<li><strong>await</strong> marks a suspension point</li>
+<li><strong>Task</strong> creates a new unit of asynchronous work</li>
+<li><strong>Actor</strong> provides data-race safety for mutable state</li>
+</ul>
+<h2>Structured concurrency with TaskGroup</h2>
+<p>For parallel work, use <code>TaskGroup</code>:</p>
+<pre><code class="language-swift">func fetchAllUsers(ids: [Int]) async throws -&gt; [User] {
+    try await withThrowingTaskGroup(of: User.self) { group in
+        for id in ids {
+            group.addTask { try await fetchUser(id: id) }
+        }
+        var users: [User] = []
+        for try await user in group {
+            users.append(user)
+        }
+        return users
+    }
+}</code></pre>
+<p>See the <a href="https://docs.swift.org/swift-book/LanguageGuide/Concurrency.html">official Swift docs</a> for more details.</p>

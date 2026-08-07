@@ -1,0 +1,19 @@
+<h2>API Response Format</h2>
+<p>The endpoint returns a JSON object with the following structure:</p>
+<pre><code class="language-json">{
+  "status": "success",
+  "data": {
+    "id": 42,
+    "name": "Example",
+    "tags": ["alpha", "beta"]
+  }
+}</code></pre>
+<p>Key fields:</p>
+<ul>
+<li><strong>status</strong> — either <code>"success"</code> or <code>"error"</code></li>
+<li><strong>data</strong> — the response payload (nullable on error)</li>
+<li><strong>tags</strong> — array of strings, can be empty</li>
+</ul>
+<blockquote>
+<p><strong>Note:</strong> The <code>id</code> field is always present, even on error responses.</p>
+</blockquote>
