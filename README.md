@@ -2,7 +2,7 @@
 
 [![ci](https://github.com/fairbearlab/choosepaste/actions/workflows/ci.yml/badge.svg)](https://github.com/fairbearlab/choosepaste/actions/workflows/ci.yml)
 
-macOS menu bar utility that transforms clipboard content before pasting. Copy text from Claude Code, ChatGPT, or a browser, paste it as clean Plain Text or Markdown into any editor.
+macOS menu bar utility that transforms clipboard content before pasting. Copy text from anywhere, paste it as clean Plain Text or Markdown into any editor.
 
 ## Install
 
