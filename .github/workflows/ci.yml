@@ -11,7 +11,7 @@ jobs:
   # Go engine: lint (golangci-lint), vet + test -race + tidy check, govulncheck.
   # Shared org workflow: https://github.com/fairbearlab/.github/blob/main/.github/workflows/go-ci.yml
   engine:
-    uses: fairbearlab/.github/.github/workflows/go-ci.yml@main
+    uses: fairbearlab/.github/.github/workflows/go-ci.yml@5a38bfa7c85a7b57fe49b132068f5f20e1d9ac85 # v1
     with:
       working-directory: engine
 
