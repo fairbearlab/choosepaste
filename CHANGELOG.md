@@ -2,7 +2,19 @@
 
 All notable changes to this project will be documented in this file.
 
-## [0.1.0.0] - 2026-04-08
+## [Unreleased]
+
+### Security
+- Bump `golang.org/x/net` to v0.58.0 and Go to 1.26.6 (fixes reachable HTML-parser
+  DoS/correctness issues; the engine parses arbitrary clipboard HTML)
+
+### Changed
+- CI: engine lint/test/vulncheck via the shared `fairbearlab/.github` Go workflow;
+  Swift app built in release configuration and uploaded as a workflow artifact
+- Added golangci-lint config, dependabot, and `make ci` (vet + lint + race tests + vulncheck)
+- Version normalized to 3-segment semver (`0.1.0`) across VERSION, Info.plist and CHANGELOG
+
+## [0.1.0] - 2026-04-08
 
 ### Added
 - macOS menu bar app with cursor-anchored popover for clipboard transforms

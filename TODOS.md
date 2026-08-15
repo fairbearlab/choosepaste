@@ -56,7 +56,7 @@
 
 ### Create Markdown fixture corpus from real-world sources
 
-**Completed:** v0.1.0.0 (2026-04-08). 5 fixtures created in engine/testdata/fixtures/ covering Claude Code, ChatGPT, browser articles, nested lists/tables, and rich text mixed content.
+**Completed:** v0.1.0 (2026-04-08). 5 fixtures created in engine/testdata/fixtures/ covering Claude Code, ChatGPT, browser articles, nested lists/tables, and rich text mixed content.
 
 ### Write the choosepaste implementation spec
 
