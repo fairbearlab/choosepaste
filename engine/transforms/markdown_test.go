@@ -115,12 +115,12 @@ func TestMarkdown_Fixtures(t *testing.T) {
 		mdFile := filepath.Join(fixturesDir, name+".md")
 
 		t.Run(name, func(t *testing.T) {
-			htmlBytes, err := os.ReadFile(htmlFile)
+			htmlBytes, err := os.ReadFile(filepath.Clean(htmlFile))
 			if err != nil {
 				t.Fatalf("failed to read %s: %v", htmlFile, err)
 			}
 
-			expectedBytes, err := os.ReadFile(mdFile)
+			expectedBytes, err := os.ReadFile(filepath.Clean(mdFile))
 			if err != nil {
 				t.Fatalf("failed to read %s: %v", mdFile, err)
 			}

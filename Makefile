@@ -1,4 +1,4 @@
-.PHONY: all engine app bundle clean test run
+.PHONY: all engine app bundle clean test run lint fmt vet vuln build ci
 
 BUILD_DIR := build
 APP_BUNDLE := $(BUILD_DIR)/ChoosePaste.app
@@ -38,10 +38,30 @@ run: bundle
 	@echo "Launching ChoosePaste..."
 	open $(APP_BUNDLE)
 
+# --- Go engine quality targets (shared fairbearlab Go standard) ---
+
 # Run Go engine tests
 test:
 	@echo "Running Go engine tests..."
-	cd engine && go test ./... -v
+	cd engine && go test -race ./...
+
+lint:
+	cd engine && golangci-lint run
+
+fmt:
+	cd engine && gofmt -w .
+
+vet:
+	cd engine && go vet ./...
+
+vuln:
+	cd engine && go run golang.org/x/vuln/cmd/govulncheck@latest ./...
+
+build:
+	cd engine && go build ./...
+
+# Everything CI runs for the engine, runnable locally before pushing
+ci: vet lint test vuln build
 
 # Clean build artifacts
 clean:

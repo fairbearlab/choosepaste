@@ -11,7 +11,7 @@ make bundle
 open build/ChoosePaste.app
 ```
 
-Requires: Go 1.22+, Swift 5.9+, macOS 14+
+Requires: Go 1.26+, Swift 5.9+, macOS 14+
 
 ## Usage
 
@@ -42,7 +42,9 @@ Go transform engine (stdin/stdout JSON)
 ## Development
 
 ```bash
-make test      # Run Go engine tests
+make test      # Run Go engine tests (-race)
+make lint      # golangci-lint on the Go engine
+make ci        # Everything CI runs for the engine: vet, lint, test, vulncheck, build
 make engine    # Build Go engine (universal binary)
 make app       # Build Swift app
 make bundle    # Build everything + assemble .app bundle
