@@ -1,6 +1,10 @@
 # choosepaste
 
-[![ci](https://github.com/fairbearlab/choosepaste/actions/workflows/ci.yml/badge.svg)](https://github.com/fairbearlab/choosepaste/actions/workflows/ci.yml)
+[![CI](https://github.com/fairbearlab/choosepaste/actions/workflows/ci.yml/badge.svg)](https://github.com/fairbearlab/choosepaste/actions/workflows/ci.yml)
+[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/fairbearlab/choosepaste/badge)](https://scorecard.dev/viewer/?uri=github.com/fairbearlab/choosepaste)
+[![Release](https://img.shields.io/github/v/release/fairbearlab/choosepaste?sort=semver)](https://github.com/fairbearlab/choosepaste/releases)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![Platform](https://img.shields.io/badge/platform-macOS-lightgrey)](#)
 
 macOS menu bar utility that transforms clipboard content before pasting. Copy text from anywhere, paste it as clean Plain Text or Markdown into any editor.
 
