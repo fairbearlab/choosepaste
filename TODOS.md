@@ -14,18 +14,6 @@
 **Priority:** P1
 **Depends on:** Alpha build available with benchmarkable transform flow
 
-### Add GitHub Actions release workflow
-
-**What:** Create `.github/workflows/release.yml` to build the universal Go engine binary and assemble the .app bundle on push to main or tag creation.
-
-**Why:** Currently the Makefile handles local builds, but there's no CI/CD pipeline to produce release artifacts automatically. Users and contributors can't download a pre-built binary after merge.
-
-**Context:** Deferred from /ship pre-flight check. The Makefile already handles the full build process (Go universal binary + Swift app + bundle assembly), so the workflow mainly needs to replicate those steps on GitHub-hosted macOS runners.
-
-**Effort:** S
-**Priority:** P2
-**Depends on:** None
-
 ## Design Review
 
 ### Design first-run onboarding flow
@@ -53,6 +41,10 @@
 **Depends on:** Alpha shipped with real users providing feedback
 
 ## Completed
+
+### Add GitHub Actions release workflow
+
+**Completed:** 2026-09-25. `.github/workflows/release.yml` added: triggers on `v*` tags, validates 3-part semver (rejects 4-part), builds the universal Go engine binary + Swift release app via `make bundle`, zips the .app, generates SHA256 checksums, and publishes a GitHub Release with auto-generated notes. Unsigned/un-notarized for now — code signing and notarization tracked as a follow-up.
 
 ### Create Markdown fixture corpus from real-world sources
 

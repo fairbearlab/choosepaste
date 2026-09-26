@@ -1,0 +1,71 @@
+# Release: builds the universal Go engine binary + Swift app, assembles the
+# .app bundle exactly as `make bundle` does, zips it, and publishes it (with
+# checksums) to a GitHub Release with auto-generated notes.
+#
+# Triggered by pushing a 3-part semver tag (vX.Y.Z). The Go toolchain used by
+# this project rejects 4-part versions, so tags with a 4th segment (or any
+# pre-release/build suffix) are rejected before any build work happens.
+#
+# The resulting app is unsigned/un-notarized (no Apple Developer ID is
+# configured in this repo yet) — see the release PR for the follow-up.
+
+name: release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: macos-latest
+    permissions:
+      contents: write # to publish the GitHub Release
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version-file: engine/go.mod
+
+      - name: Derive and validate version from tag
+        id: version
+        run: |
+          tag="${GITHUB_REF#refs/tags/}"
+          version="${tag#v}"
+          if [[ ! "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::Tag '$tag' is not a 3-part semver (vX.Y.Z). Go tooling in this repo rejects 4-part versions; retag with e.g. v${version%%.*}.0.0." >&2
+            exit 1
+          fi
+          if [[ -f VERSION && "$(cat VERSION)" != "$version" ]]; then
+            echo "::warning::Tag version ($version) does not match VERSION file ($(cat VERSION))."
+          fi
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+      - name: Bundle (engine + app)
+        run: make bundle
+
+      - name: Package artifacts
+        id: package
+        run: |
+          set -euo pipefail
+          cd build
+          zip_name="ChoosePaste-${{ steps.version.outputs.tag }}-macos.zip"
+          zip -r -X -q "$zip_name" ChoosePaste.app
+          shasum -a 256 "$zip_name" > SHA256SUMS.txt
+          echo "zip_name=$zip_name" >> "$GITHUB_OUTPUT"
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "${{ steps.version.outputs.tag }}" \
+            "build/${{ steps.package.outputs.zip_name }}" \
+            "build/SHA256SUMS.txt" \
+            --repo "${{ github.repository }}" \
+            --title "${{ steps.version.outputs.tag }}" \
+            --generate-notes
