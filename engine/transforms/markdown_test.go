@@ -134,7 +134,7 @@ func TestMarkdown_Fixtures(t *testing.T) {
 			gotNorm := normalizeTrailingWS(got)
 
 			if *update {
-				if err := os.WriteFile(mdFile, []byte(gotNorm+"\n"), 0o600); err != nil {
+				if err := os.WriteFile(filepath.Clean(mdFile), []byte(gotNorm+"\n"), 0o600); err != nil {
 					t.Fatalf("failed to write %s: %v", mdFile, err)
 				}
 				return
