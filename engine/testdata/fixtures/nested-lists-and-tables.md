@@ -1,16 +1,16 @@
 ## Project Structure
 
 - **Frontend**
-  
+
   - React 18 with TypeScript
   - Tailwind CSS for styling
   - Components:
-    
+
     - `Header.tsx`
     - `Sidebar.tsx`
     - `Dashboard.tsx`
 - **Backend**
-  
+
   - Go 1.22 with Chi router
   - PostgreSQL database
 

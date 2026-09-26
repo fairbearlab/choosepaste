@@ -1,0 +1,7 @@
+<h2>Architecture Overview</h2>
+<p>The diagram below shows the request flow through the system.</p>
+<figure>
+<img src="https://assets.example.com/diagrams/request-flow.png" alt="Diagram showing a client sending a request through a load balancer to two backend services">
+<figcaption>Figure 1: Request flow from client to backend</figcaption>
+</figure>
+<p>Each service reports health to a shared <img src="https://assets.example.com/icons/heartbeat.png" alt="heartbeat icon"> monitor, which is polled every 30 seconds.</p>

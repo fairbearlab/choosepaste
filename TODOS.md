@@ -56,7 +56,7 @@
 
 ### Create Markdown fixture corpus from real-world sources
 
-**Completed:** v0.1.0 (2026-04-08). 5 fixtures created in engine/testdata/fixtures/ covering Claude Code, ChatGPT, browser articles, nested lists/tables, and rich text mixed content.
+**Completed:** v0.1.0 (2026-04-08), expanded 2026-09-26. 13 fixtures in engine/testdata/fixtures/ (hand-synthesized, no scraped page content): the original 5 (Claude Code, ChatGPT, browser articles, nested lists/tables, rich text mixed) plus Google Docs- and Word-style clipboard spans, images/captions, hr/strikethrough/sub/sup, definition lists, loose multi-paragraph list items, table colspan/alignment, and tracking-link/anchor edge cases. `TestMarkdown_Fixtures` in engine/transforms/markdown_test.go gained a `-update` flag to regenerate the golden .md files from current converter output. Several fixtures intentionally golden the engine's *current* (buggy) output rather than the ideal one — see suspected-bugs list in PR history for fairbearlab/choosepaste.
 
 ### Write the choosepaste implementation spec
 

@@ -1,12 +1,19 @@
 package transforms
 
 import (
+	"flag"
 	"os"
 	"path/filepath"
 	"regexp"
 	"strings"
 	"testing"
 )
+
+// update regenerates the golden .md fixture files from the current output of
+// the HTML-to-Markdown converter. Run with:
+//
+//	go test ./transforms/... -run TestMarkdown_Fixtures -update
+var update = flag.Bool("update", false, "update golden fixture files (testdata/fixtures/*.md) with current converter output")
 
 // normalizeBlankLines strips trailing whitespace from each line.
 // This avoids false negatives when linters strip trailing spaces
@@ -120,18 +127,25 @@ func TestMarkdown_Fixtures(t *testing.T) {
 				t.Fatalf("failed to read %s: %v", htmlFile, err)
 			}
 
-			expectedBytes, err := os.ReadFile(filepath.Clean(mdFile))
-			if err != nil {
-				t.Fatalf("failed to read %s: %v", mdFile, err)
-			}
-
 			got, err := Markdown(string(htmlBytes), "html")
 			if err != nil {
 				t.Fatalf("transform error: %v", err)
 			}
+			gotNorm := normalizeTrailingWS(got)
+
+			if *update {
+				if err := os.WriteFile(mdFile, []byte(gotNorm+"\n"), 0o600); err != nil {
+					t.Fatalf("failed to write %s: %v", mdFile, err)
+				}
+				return
+			}
+
+			expectedBytes, err := os.ReadFile(filepath.Clean(mdFile))
+			if err != nil {
+				t.Fatalf("failed to read %s: %v (run with -update to create it)", mdFile, err)
+			}
 
 			expected := normalizeTrailingWS(string(expectedBytes))
-			gotNorm := normalizeTrailingWS(got)
 			if gotNorm != expected {
 				t.Errorf("fixture %s mismatch:\n--- got ---\n%s\n--- expected ---\n%s", name, gotNorm, expected)
 			}
