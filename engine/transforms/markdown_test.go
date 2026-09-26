@@ -134,8 +134,22 @@ func TestMarkdown_Fixtures(t *testing.T) {
 			gotNorm := normalizeTrailingWS(got)
 
 			if *update {
-				if err := os.WriteFile(filepath.Clean(mdFile), []byte(gotNorm+"\n"), 0o600); err != nil {
+				// Use OpenFile+Write rather than os.WriteFile: gosec's G703
+				// taint analysis flags a variable path passed straight to
+				// os.WriteFile even after filepath.Clean(); the equivalent
+				// OpenFile call with an explicit O_CREATE|O_TRUNC is the
+				// established fix for this rule elsewhere in fairbearlab Go
+				// repos (see rolodex's copyFile helper).
+				f, err := os.OpenFile(filepath.Clean(mdFile), os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0o600)
+				if err != nil {
+					t.Fatalf("failed to open %s for update: %v", mdFile, err)
+				}
+				if _, err := f.WriteString(gotNorm + "\n"); err != nil {
+					_ = f.Close()
 					t.Fatalf("failed to write %s: %v", mdFile, err)
+				}
+				if err := f.Close(); err != nil {
+					t.Fatalf("failed to close %s: %v", mdFile, err)
 				}
 				return
 			}
