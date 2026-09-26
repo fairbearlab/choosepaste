@@ -1,12 +1,19 @@
 package transforms
 
 import (
+	"flag"
 	"os"
 	"path/filepath"
 	"regexp"
 	"strings"
 	"testing"
 )
+
+// update regenerates the golden .md fixture files from the current output of
+// the HTML-to-Markdown converter. Run with:
+//
+//	go test ./transforms/... -run TestMarkdown_Fixtures -update
+var update = flag.Bool("update", false, "update golden fixture files (testdata/fixtures/*.md) with current converter output")
 
 // normalizeBlankLines strips trailing whitespace from each line.
 // This avoids false negatives when linters strip trailing spaces
@@ -120,18 +127,39 @@ func TestMarkdown_Fixtures(t *testing.T) {
 				t.Fatalf("failed to read %s: %v", htmlFile, err)
 			}
 
-			expectedBytes, err := os.ReadFile(filepath.Clean(mdFile))
-			if err != nil {
-				t.Fatalf("failed to read %s: %v", mdFile, err)
-			}
-
 			got, err := Markdown(string(htmlBytes), "html")
 			if err != nil {
 				t.Fatalf("transform error: %v", err)
 			}
+			gotNorm := normalizeTrailingWS(got)
+
+			if *update {
+				// Use OpenFile+Write rather than os.WriteFile: gosec's G703
+				// taint analysis flags a variable path passed straight to
+				// os.WriteFile even after filepath.Clean(); the equivalent
+				// OpenFile call with an explicit O_CREATE|O_TRUNC is the
+				// established fix for this rule elsewhere in fairbearlab Go
+				// repos (see rolodex's copyFile helper).
+				f, err := os.OpenFile(filepath.Clean(mdFile), os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0o600)
+				if err != nil {
+					t.Fatalf("failed to open %s for update: %v", mdFile, err)
+				}
+				if _, err := f.WriteString(gotNorm + "\n"); err != nil {
+					_ = f.Close()
+					t.Fatalf("failed to write %s: %v", mdFile, err)
+				}
+				if err := f.Close(); err != nil {
+					t.Fatalf("failed to close %s: %v", mdFile, err)
+				}
+				return
+			}
+
+			expectedBytes, err := os.ReadFile(filepath.Clean(mdFile))
+			if err != nil {
+				t.Fatalf("failed to read %s: %v (run with -update to create it)", mdFile, err)
+			}
 
 			expected := normalizeTrailingWS(string(expectedBytes))
-			gotNorm := normalizeTrailingWS(got)
 			if gotNorm != expected {
 				t.Errorf("fixture %s mismatch:\n--- got ---\n%s\n--- expected ---\n%s", name, gotNorm, expected)
 			}

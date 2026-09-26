@@ -13,6 +13,9 @@ All notable changes to this project will be documented in this file.
   Swift app built in release configuration and uploaded as a workflow artifact
 - Added golangci-lint config, dependabot, and `make ci` (vet + lint + race tests + vulncheck)
 - Version normalized to 3-segment semver (`0.1.0`) across VERSION, Info.plist and CHANGELOG
+- Engine tests: Markdown golden fixture corpus grown from 5 to 13 (Google Docs/Word clipboard,
+  images, strikethrough, definition lists, loose lists, colspan tables, anchors) and
+  `TestMarkdown_Fixtures` gained a `-update` flag; known converter bugs are pinned and tracked in TODOS.md
 
 ## [0.1.0] - 2026-04-08
 

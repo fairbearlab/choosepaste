@@ -26,6 +26,24 @@
 **Priority:** P2
 **Depends on:** None
 
+### Fix converter bugs pinned by the golden fixtures
+
+**What:** Fix the HTML-to-Markdown behaviours that `engine/testdata/fixtures/` currently goldens as-is, then regenerate the affected goldens with `go test ./transforms/... -run TestMarkdown_Fixtures -update` and review the diff by hand.
+
+**Why:** Six fixtures deliberately pin the converter's *current* output so regressions are caught, but that output is wrong. A future fix will show up as a fixture "failure"; this list says which failures are the intended ones.
+
+**Context:** Pinned bugs, by fixture:
+- `google-docs-clipboard`: the `<b style="font-weight:normal">` wrapper bolds the whole document, and list items under it lose their `-` markers.
+- `word-clipboard`: `mso-list` fake bullets come through as literal `·` plus `&nbsp;` runs instead of `- ` items; `<p>&nbsp;</p>` spacer paragraphs leak as lines holding a lone non-breaking space.
+- `rule-strikethrough-sub-sup`: `<del>`/`<s>` are unwrapped to plain text (so "$49/month $39/month" reads as two prices); the library's `strikethrough` plugin is not wired in. `<sub>`/`<sup>` are flattened (H2O, reference1).
+- `definition-list`: `<dl>/<dt>/<dd>` become undifferentiated paragraphs.
+- `table-colspan-alignment`: `colspan` content lands in column 1 with empty cells after it, and `text-align` is ignored in the alignment row.
+- `tracking-links-and-anchors`: `<a name="top"></a>` and `href=""` render as `[]()` / `[text]()`.
+
+**Effort:** M
+**Priority:** P2
+**Depends on:** None
+
 ## Design Review
 
 ### Design first-run onboarding flow
@@ -56,7 +74,7 @@
 
 ### Create Markdown fixture corpus from real-world sources
 
-**Completed:** v0.1.0 (2026-04-08). 5 fixtures created in engine/testdata/fixtures/ covering Claude Code, ChatGPT, browser articles, nested lists/tables, and rich text mixed content.
+**Completed:** v0.1.0 (2026-04-08), expanded 2026-09-26. 13 fixtures in engine/testdata/fixtures/ (hand-synthesized, no scraped page content): the original 5 (Claude Code, ChatGPT, browser articles, nested lists/tables, rich text mixed) plus Google Docs- and Word-style clipboard spans, images/captions, hr/strikethrough/sub/sup, definition lists, loose multi-paragraph list items, table colspan/alignment, and tracking-link/anchor edge cases. `TestMarkdown_Fixtures` in engine/transforms/markdown_test.go gained a `-update` flag to regenerate the golden .md files from current converter output. Several fixtures intentionally golden the engine's *current* (buggy) output rather than the ideal one — see "Fix converter bugs pinned by the golden fixtures" above.
 
 ### Write the choosepaste implementation spec
 
