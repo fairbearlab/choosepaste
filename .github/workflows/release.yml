@@ -1,0 +1,95 @@
+# Release: builds the universal Go engine binary + Swift app, assembles the
+# .app bundle exactly as `make bundle` does, zips it, and publishes it (with
+# checksums) to a GitHub Release with auto-generated notes.
+#
+# Triggered by pushing a 3-part semver tag (vX.Y.Z). The Go toolchain used by
+# this project rejects 4-part versions, so tags with a 4th segment (or any
+# pre-release/build suffix) are rejected before any build work happens.
+#
+# The resulting app is ad-hoc signed only, not notarized (no Apple Developer ID is
+# configured in this repo yet) — see the release PR for the follow-up.
+
+name: release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: macos-latest
+    permissions:
+      contents: write # to publish the GitHub Release
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version-file: engine/go.mod
+
+      - name: Derive and validate version from tag
+        id: version
+        run: |
+          tag="${GITHUB_REF#refs/tags/}"
+          version="${tag#v}"
+          if [[ ! "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::Tag '$tag' is not a 3-part semver (vX.Y.Z). Go tooling in this repo rejects 4-part versions; retag with e.g. v${version%%.*}.0.0." >&2
+            exit 1
+          fi
+          # The bundle ships VERSION/Info.plist as-is, so a mismatched tag would
+          # publish an app that reports the wrong version. Fail instead.
+          file_version="$(tr -d '[:space:]' < VERSION)"
+          plist_version="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' ChoosePaste/Resources/Info.plist)"
+          if [[ "$file_version" != "$version" || "$plist_version" != "$version" ]]; then
+            echo "::error::Tag version ($version) must match VERSION ($file_version) and Info.plist CFBundleShortVersionString ($plist_version). Bump them before tagging." >&2
+            exit 1
+          fi
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+      - name: Bundle (engine + app)
+        run: make bundle
+
+      # Without a bundle-level signature the .app fails `codesign -v` ("code has
+      # no resources but signature indicates they must be present"), which
+      # Gatekeeper reports as "damaged" for downloaded copies. Ad-hoc sign it
+      # until Developer ID signing + notarization exist.
+      - name: Ad-hoc sign bundle
+        run: |
+          codesign --force --deep --sign - build/ChoosePaste.app
+          codesign --verify --strict --deep build/ChoosePaste.app
+
+      - name: Package artifacts
+        id: package
+        env:
+          TAG: ${{ steps.version.outputs.tag }}
+        run: |
+          set -euo pipefail
+          cd build
+          zip_name="ChoosePaste-${TAG}-macos.zip"
+          zip -r -X -q "$zip_name" ChoosePaste.app
+          shasum -a 256 "$zip_name" > SHA256SUMS.txt
+          echo "zip_name=$zip_name" >> "$GITHUB_OUTPUT"
+
+      # Re-run safe: if the release already exists (earlier run, or a partial
+      # upload), replace its assets instead of failing on `gh release create`.
+      - name: Publish GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.version.outputs.tag }}
+          ZIP_NAME: ${{ steps.package.outputs.zip_name }}
+        run: |
+          set -euo pipefail
+          assets=("build/$ZIP_NAME" "build/SHA256SUMS.txt")
+          if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            gh release upload "$TAG" "${assets[@]}" --repo "$GITHUB_REPOSITORY" --clobber
+          else
+            gh release create "$TAG" "${assets[@]}" \
+              --repo "$GITHUB_REPOSITORY" \
+              --title "$TAG" \
+              --generate-notes
+          fi

@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Added
+- CI: release workflow (`.github/workflows/release.yml`) — on a `vX.Y.Z` tag push,
+  builds the universal Go engine + Swift release app, zips the .app bundle, and
+  publishes it with SHA256 checksums to a GitHub Release with generated notes.
+  The tag must match `VERSION` and Info.plist; the bundle is ad-hoc signed (not
+  notarized) and re-running the workflow replaces the release assets
+
 ### Security
 - Bump `golang.org/x/net` to v0.58.0 and Go to 1.26.6 (fixes reachable HTML-parser
   DoS/correctness issues; the engine parses arbitrary clipboard HTML)

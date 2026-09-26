@@ -14,17 +14,17 @@
 **Priority:** P1
 **Depends on:** Alpha build available with benchmarkable transform flow
 
-### Add GitHub Actions release workflow
+### Developer ID signing and notarization for release builds
 
-**What:** Create `.github/workflows/release.yml` to build the universal Go engine binary and assemble the .app bundle on push to main or tag creation.
+**What:** Extend `.github/workflows/release.yml` to sign the app (and the embedded `choosepaste-engine`) with a Developer ID Application certificate, notarize with `notarytool`, and staple the ticket before zipping.
 
-**Why:** Currently the Makefile handles local builds, but there's no CI/CD pipeline to produce release artifacts automatically. Users and contributors can't download a pre-built binary after merge.
+**Why:** Releases are currently ad-hoc signed only. Downloaded copies pass `codesign --verify` but Gatekeeper still blocks first launch ("Apple could not verify..."), so users must approve the app in System Settings.
 
-**Context:** Deferred from /ship pre-flight check. The Makefile already handles the full build process (Go universal binary + Swift app + bundle assembly), so the workflow mainly needs to replicate those steps on GitHub-hosted macOS runners.
+**Context:** Split out of the release-workflow PR (#12): no Apple Developer ID or signing secrets exist in this repo yet. Needs an Apple Developer account, repository secrets for the certificate/notary credentials, and a hardened-runtime entitlements check for the `Process()` launch of the engine.
 
-**Effort:** S
+**Effort:** M
 **Priority:** P2
-**Depends on:** None
+**Depends on:** Apple Developer Program membership and signing secrets configured
 
 ## Design Review
 
@@ -53,6 +53,10 @@
 **Depends on:** Alpha shipped with real users providing feedback
 
 ## Completed
+
+### Add GitHub Actions release workflow
+
+**Completed:** 2026-09-25. `.github/workflows/release.yml` added: triggers on `v*` tags, validates 3-part semver (rejects 4-part), builds the universal Go engine binary + Swift release app via `make bundle`, zips the .app, generates SHA256 checksums, and publishes a GitHub Release with auto-generated notes. Hardened in review: tag must match VERSION and Info.plist, the bundle is ad-hoc signed and verified, and publishing is re-run safe. Developer ID signing + notarization tracked above.
 
 ### Create Markdown fixture corpus from real-world sources
 
